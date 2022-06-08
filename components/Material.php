@@ -46,12 +46,6 @@ class Material implements TripleDownComponent
         } else if ($random <= 100) {
             $materialToInsert = 5;
         }
-
-        if ($random <= 45) {
-            $materialToInsert = 1;
-        } else {
-            $materialToInsert = 2;
-        }
         return $materialToInsert;
     }
 

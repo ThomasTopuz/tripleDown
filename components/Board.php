@@ -29,13 +29,19 @@ class Board implements TripleDownComponent
 
         $intialFilledCells =  intval(((self::BOARD_LENGHT *  self::BOARD_LENGHT) / 100) * 20) + 1;
         for ($i = 0; $i < $intialFilledCells; $i++) {
-            $materialToInsert = rand(1, 3);
-            $col = rand(0, self::BOARD_LENGHT);
-            $row = rand(0, self::BOARD_LENGHT);
+            do {
+
+                $materialToInsert = rand(1, 3);
+                $col = rand(0, self::BOARD_LENGHT - 1);
+                $row = rand(0, self::BOARD_LENGHT - 1);
+            } while ($_board[$row][$col] != self::EMPTY);
+
             $_board[$row][$col] = $materialToInsert;
+            $this->board = $_board;
+            echo " row " . $row . " col " . $col;
+            $this->insert($materialToInsert, $row, $col);
         }
 
-        $this->board = $_board;
         $this->saveState();
     }
 
@@ -52,9 +58,6 @@ class Board implements TripleDownComponent
         }
     }
 
-    public function executeCellUpgrade()
-    {
-    }
     /**
      * Method used to insert a new value in the board
      */
@@ -63,6 +66,8 @@ class Board implements TripleDownComponent
         $this->board[$row][$col] = $val;
 
         $currentValue = $val;
+
+        // to while to enable combos
         do {
             self::$involvedCells = array();
             self::$visitedCells = array();

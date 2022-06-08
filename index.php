@@ -1,6 +1,11 @@
 <?php
 session_start();
 
+if (isset($_GET["reset"])) {
+    session_destroy();
+    header("Location: /");
+}
+
 include_once "./components/Bomb.php";
 include_once "./components/Board.php";
 include_once "./components/Material.php";
@@ -22,3 +27,6 @@ if (isset($_GET["action"])) {
 
 $material->render();
 $board->render();
+
+?>
+<a href="?reset=true">reset</a>
