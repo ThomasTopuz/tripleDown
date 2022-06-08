@@ -1,20 +1,24 @@
 <?php
 session_start();
-include_once "Board.php";
-include_once "Material.php";
+
+include_once "./components/Bomb.php";
+include_once "./components/Board.php";
+include_once "./components/Material.php";
+include_once "./models/Cell.php";
 
 
-
+# formula per il punteggio: (nr coinvolti + livello) eleveato livello
 $board = Board::getInstance();
-$board->render();
 $material = Material::getInstance();
 
+$cell = new Cell("5", 2, 1);
 if (isset($_GET["action"])) {
-    
-    $currentMaterial = $material->getCurrent();
-    $material->play();
+    if ($_GET["action"] == "insert") {
+        $currentMaterial = $material->getCurrent();
+        $material->insert();
+        $board->insert($currentMaterial, $_GET["row"], $_GET["col"]);
+    }
 }
 
 $material->render();
-
-?>
+$board->render();
