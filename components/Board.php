@@ -6,9 +6,11 @@ include_once './contracts/TripleDownComponent.php';
 class Board implements TripleDownComponent
 {
     const BOARD_LENGHT = 8;
+    const EMPTY = " ";
     private $board;
     private $points = 0;
     private static $involvedCells = array();
+    private static $visitedCells = array();
 
     /**
      * Constructor of Board instance, generates randomly a new board and saves it in session
@@ -20,7 +22,7 @@ class Board implements TripleDownComponent
         for ($i = 0; $i < self::BOARD_LENGHT; $i++) {
             $row = array();
             for ($j = 0; $j < self::BOARD_LENGHT; $j++) {
-                array_push($row, 0);
+                array_push($row, self::EMPTY);
             }
             array_push($_board, $row);
         }
@@ -59,14 +61,20 @@ class Board implements TripleDownComponent
     public function insert($val, $row, $col)
     {
         $this->board[$row][$col] = $val;
-        $this->findInvolvedCells($val, $row, $col, self::$involvedCells);
-        if (count(self::$involvedCells) >= 3) {
-            $this->clearInvolvedCells(self::$involvedCells);
-            $this->upgradeMaterialOnCell($row, $col, $val);
-            $this->points = pow($this->points + count(self::$involvedCells) * intval($val), intval($val));
-        }
 
-        self::$involvedCells = array();
+        $currentValue = $val;
+        do {
+            self::$involvedCells = array();
+            self::$visitedCells = array();
+            $this->findInvolvedCells($currentValue, $row, $col, self::$involvedCells, self::$visitedCells);
+            if (count(self::$involvedCells) >= 3) {
+                $this->clearInvolvedCells(self::$involvedCells);
+                $this->upgradeMaterialOnCell($row, $col, $currentValue);
+                $this->points = pow($this->points + count(self::$involvedCells) * intval($currentValue), intval($currentValue));
+                $currentValue += 1;
+            }
+        } while (count(self::$involvedCells) >= 3);
+
         $this->saveState();
     }
 
@@ -79,9 +87,8 @@ class Board implements TripleDownComponent
      * @param $involvedCells array of cells involved in the move, this cells will be deleted
      * @return bool
      */
-    private  function findInvolvedCells($val, $row, $col, &$involvedCells)
+    private  function findInvolvedCells($val, $row, $col, &$involvedCells, &$visitedCells)
     {
-        static $visitedCells = array();
 
         if ($row > self::BOARD_LENGHT - 1 || $row < 0 || $col > self::BOARD_LENGHT - 1 || $col < 0) {
             return false;
@@ -101,25 +108,25 @@ class Board implements TripleDownComponent
         }
 
         // down 
-        if (self::findInvolvedCells($val, $row + 1, $col, $involvedCells)) {
+        if (self::findInvolvedCells($val, $row + 1, $col, $involvedCells, $visitedCells)) {
             array_push($involvedCells, new Cell($row + 1, $col, $val));
             return true;
         }
 
         // up
-        if (self::findInvolvedCells($val, $row - 1, $col, $involvedCells)) {
+        if (self::findInvolvedCells($val, $row - 1, $col, $involvedCells, $visitedCells)) {
             array_push($involvedCells, new Cell($row - 1, $col, $val));
             return true;
         }
 
         // right
-        if (self::findInvolvedCells($val, $row, $col + 1, $involvedCells)) {
+        if (self::findInvolvedCells($val, $row, $col + 1, $involvedCells, $visitedCells)) {
             array_push($involvedCells, new Cell($row, $col + 1, $val));
             return true;
         }
 
         // left
-        if (self::findInvolvedCells($val, $row, $col - 1, $involvedCells)) {
+        if (self::findInvolvedCells($val, $row, $col - 1, $involvedCells, $visitedCells)) {
             array_push($involvedCells, new Cell($row, $col - 1, $val));
             return true;
         }
@@ -146,20 +153,8 @@ class Board implements TripleDownComponent
     private function clearInvolvedCells($cells)
     {
         foreach ($cells as &$cell) {
-            $this->board[$cell->row][$cell->col] = 0;
+            $this->board[$cell->row][$cell->col] = self::EMPTY;
         }
-    }
-
-    /**
-     * Method used by the Bomb component to clear a certain cell after launching a bomb
-     * @param $row row of the cell
-     * @param $col column of the cell
-     * @return void
-     */
-    public function clearCell($row, $col)
-    {
-        $this->board[$row][$col] = 0;
-        $this->saveState();
     }
 
     /**
@@ -189,7 +184,7 @@ class Board implements TripleDownComponent
         for ($i = 0; $i < self::BOARD_LENGHT; $i++) {
             echo '<tr>';
             for ($ii = 0; $ii < self::BOARD_LENGHT; $ii++) {
-                if ($this->board[$i][$ii] == "0") {
+                if ($this->board[$i][$ii] == self::EMPTY) {
                     $href = '?action=insert&row=' . $i . '&col=' . $ii;
                     $isGameEnded = false;
                 } else {
