@@ -28,20 +28,28 @@ class Board implements TripleDownComponent
         }
 
         $intialFilledCells =  intval(((self::BOARD_LENGHT *  self::BOARD_LENGHT) / 100) * 20) + 1;
+        $intialFilledCells = 10;
+        $initialCells = array();
+
         for ($i = 0; $i < $intialFilledCells; $i++) {
             do {
-
                 $materialToInsert = rand(1, 3);
                 $col = rand(0, self::BOARD_LENGHT - 1);
                 $row = rand(0, self::BOARD_LENGHT - 1);
             } while ($_board[$row][$col] != self::EMPTY);
 
             $_board[$row][$col] = $materialToInsert;
-            $this->board = $_board;
-            echo " row " . $row . " col " . $col;
-            $this->insert($materialToInsert, $row, $col);
+            echo " row " . $row . " col " . $col . "mat " . $materialToInsert;
+            array_push($initialCells, new Cell($row, $col, $materialToInsert));
         }
 
+        $this->board = $_board;
+
+        foreach ($initialCells as &$cell) {
+            $this->insert($cell->value, $cell->row, $cell->col);
+        }
+
+        $this->points = 0;
         $this->saveState();
     }
 
