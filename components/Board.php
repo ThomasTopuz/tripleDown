@@ -39,7 +39,6 @@ class Board implements TripleDownComponent
             } while ($_board[$row][$col] != self::EMPTY);
 
             $_board[$row][$col] = $materialToInsert;
-            echo " row " . $row . " col " . $col . "mat " . $materialToInsert;
             array_push($initialCells, new Cell($row, $col, $materialToInsert));
         }
 
