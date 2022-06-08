@@ -170,6 +170,18 @@ class Board implements TripleDownComponent
     }
 
     /**
+     * Method used by the Bomb component to clear a certain cell after launching a bomb
+     * @param $row row of the cell
+     * @param $col column of the cell
+     * @return void
+     */
+    public function clearCell($row, $col)
+    {
+        $this->board[$row][$col] = self::EMPTY;
+        $this->saveState();
+    }
+
+    /**
      * Method to check if a cell is in a cell array
      * @param $visitedCells array of cells
      * @param $cell cell
