@@ -28,7 +28,6 @@ class Board implements TripleDownComponent
         }
 
         $intialFilledCells =  intval(((self::BOARD_LENGHT *  self::BOARD_LENGHT) / 100) * 20) + 1;
-        $intialFilledCells = 10;
         $initialCells = array();
 
         for ($i = 0; $i < $intialFilledCells; $i++) {
